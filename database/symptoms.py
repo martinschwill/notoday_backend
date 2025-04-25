@@ -16,7 +16,7 @@ symptoms = [
   {'id': 15, 'name': 'Apatia, zobojętnienie'}, 
   {'id': 16, 'name': 'Ból'}, 
   {'id': 17, 'name': 'Znudzenie'}, 
- {'id': 18, 'name':  'Zwiększona liczba konfliktów'},
+  {'id': 18, 'name':  'Zwiększona liczba konfliktów'},
   {'id': 19, 'name': 'Nadpobudliwość'},
   {'id': 20, 'name': 'Zwątpienie w wartość trzeźwego życia'},
   {'id': 21, 'name': 'Zaburzenia snu'},
