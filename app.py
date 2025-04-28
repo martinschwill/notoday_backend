@@ -48,6 +48,32 @@ def get_user(user_id):
         return jsonify({"error": "User not found"}), 404
     return jsonify(user)
 
+@app.route('/login', methods=['POST'])
+def login():
+    login_data = request.json
+    user_name = login_data.get("user_name")
+    user_password = login_data.get("user_password")
+    
+    # Call the db_handler method to validate the user
+    response = db_handler.login_user(user_name, user_password)
+    
+    # Check for errors in the response
+    if "error" in response:
+        return jsonify(response), 401  # Unauthorized
+    
+    return jsonify(response), 200  # OK
+
+
+# Endpoint to get the number of days since a user was last sober
+@app.route('/users/<int:user_id>/days_since_sober', methods=['GET'])
+def get_days_since_sober(user_id):
+    response = db_handler.get_user_days_since_sober(user_id)
+    if isinstance(response, int): 
+        return jsonify({"days_since_sober": response}), 200
+    else:     
+        return jsonify(response), 404
+    
+
 # Endpoint to update a user's last_date_sober
 @app.route('/users/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
