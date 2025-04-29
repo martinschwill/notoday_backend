@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # MongoDB connection setup
 client = MongoClient("mongodb://localhost:27017/")
@@ -59,3 +59,45 @@ def get_user_days_since_sober(user_id):
     # Calculate the difference in days
     days_since_sober = (datetime.now() - last_date_sober).days
     return days_since_sober
+
+
+### days operations ###
+
+# Method to check if a user_id-date combination exists
+def check_user_date_exists(user_id, date):
+    record = db["user_symptoms"].find_one({"user_id": user_id, "date": date})
+    print(f'RECORD: {record}') 
+    return record is not None
+
+# Method to add a new user_id-date record with symptoms
+def add_user_symptoms(user_id, date, symptoms):
+    if check_user_date_exists(user_id, date):
+        return {"error": "Record for this user and date already exists"}
+    
+    db["user_symptoms"].insert_one({
+        "user_id": user_id,
+        "date": date,
+        "symptoms": symptoms
+    })
+    return {"message": "Symptoms added successfully"}
+
+# Method to update symptoms for an existing user_id-date record
+def update_user_symptoms(user_id, date, symptoms):
+    result = db["user_symptoms"].update_one(
+        {"user_id": user_id, "date": date},
+        {"$set": {"symptoms": symptoms}}
+    )
+    if result.matched_count == 0:
+        return {"error": "Record not found for this user and date"}
+    return {"message": "Symptoms updated successfully"}
+
+# Method to retrieve symptoms for x days in the past
+def get_symptoms_for_past_days(user_id, days):
+    start_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+    records = list(db["user_symptoms"].find(
+        {"user_id": user_id, "date": {"$gte": start_date}},
+        {"_id": 0}
+    ))
+    if not records:
+        return {"error": "No records found for the given user and date range"}
+    return records

@@ -84,5 +84,53 @@ def update_user(user_id):
         return jsonify(response), 404
     return jsonify(response)
 
+# Endpoint to add a new user_id-date record with symptoms
+@app.route('/days', methods=['POST'])
+def add_symptoms():
+    data = request.json
+    user_id = data.get("user_id")
+    date = data.get("date")
+    symptoms = data.get("symptoms", [])
+    
+    response = db_handler.add_user_symptoms(user_id, date, symptoms)
+    if "error" in response:
+        return jsonify(response), 400
+    return jsonify(response), 201
+
+# Endpoint to check if a user_id-date combination exists
+@app.route('/days/check', methods=['POST'])
+def check_user_date():
+    data = request.json
+    user_id = data.get("user_id")
+    date = data.get("date")
+    print(f'{user_id}, {date}')
+    exists = db_handler.check_user_date_exists(user_id, date)
+    return jsonify({"exists": exists}), 200
+
+# Endpoint to update symptoms for an existing user_id-date record
+@app.route('/days', methods=['PUT'])
+def update_symptoms():
+    data = request.json
+    user_id = data.get("user_id")
+    date = data.get("date")
+    symptoms = data.get("symptoms", [])
+    
+    response = db_handler.update_user_symptoms(user_id, date, symptoms)
+    if "error" in response:
+        return jsonify(response), 404
+    return jsonify(response), 200
+
+# Endpoint to retrieve symptoms for x days in the past
+@app.route('/days/past', methods=['GET'])
+def get_past_symptoms():
+    user_id = request.args.get("user_id", type=int)
+    days = request.args.get("days", type=int)
+    
+    response = db_handler.get_symptoms_for_past_days(user_id, days)
+    if "error" in response:
+        return jsonify(response), 404
+    return jsonify(response), 200
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)
