@@ -1,8 +1,10 @@
 from pymongo import MongoClient
 from datetime import datetime, timedelta
+import os 
 
 # MongoDB connection setup
-client = MongoClient("mongodb://localhost:27017/")
+mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+client = MongoClient(mongo_uri)
 db = client["notoday_db"]
 symptoms_collection = db["symptoms"]
 users_collection = db["users"]
