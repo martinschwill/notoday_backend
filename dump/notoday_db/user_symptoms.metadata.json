@@ -1,1 +1,0 @@
-{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"user_id":{"$numberInt":"1"},"date":{"$numberInt":"1"}},"name":"user_id_1_date_1"}],"uuid":"26a5463fe09c4e2ebcd55e336155c94b","collectionName":"user_symptoms","type":"collection"}
