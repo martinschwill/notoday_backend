@@ -139,10 +139,11 @@ def update_symptoms():
     return jsonify(response), 200
 
 # Endpoint to retrieve symptoms for x days in the past
-@app.route('/days/past', methods=['GET'])
+@app.route('/days/past', methods=['POST'])
 def get_past_symptoms():
-    user_id = request.args.get("user_id", type=int)
-    days = request.args.get("days", type=int)
+    data = request.json
+    user_id = data.get("user_id", None)
+    days = data.get("days", None) 
     
     response = db_handler.get_symptoms_for_past_days(user_id, days)
     if "error" in response:
