@@ -35,6 +35,22 @@ def update_user_last_date_sober(user_id, last_date_sober):
         return {"error": "User not found"}
     return {"message": "User updated successfully"}
 
+def add_user_slipup(user_id, slipup_date):
+    result = users_collection.update_one(
+        {"user_id": user_id},
+        {"$push": {"slipups": slipup_date}}
+    )
+    if result.matched_count == 0:
+        return {"error": "User not found"}
+    return {"message": "Slipup date updated successfully"}
+
+def get_user_slipups(user_id):
+    user = users_collection.find({"user_id": user_id})
+    if not user:
+        return {"error": "User not found"}
+    slipups = user['slipups'] if 'slipups' in user else []
+    return {"slipups": slipups}
+
 def login_user(user_name, user_password):
     # Find the user by user_name
     user = users_collection.find_one({"user_name": user_name})

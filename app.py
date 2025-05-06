@@ -66,6 +66,33 @@ def get_user(user_id):
         return jsonify({"error": "User not found"}), 404
     return jsonify(user)
 
+# Endpoint to add a slipup date for a user
+@app.route('/users/slipup', methods=['POST'])
+def add_slipup():
+    slipup_data = request.json
+    slipup_date = slipup_data.get("slipup_date")
+    user_id = slipup_data.get("user_id")
+    
+    # Call the db_handler method to add the slipup date
+    response = db_handler.add_user_slipup(user_id, slipup_date)
+    
+    # Check for errors in the response
+    if "error" in response:
+        return jsonify(response), 404
+    return jsonify(response), 200
+
+# Endpoint to get all slipups for a user
+@app.route('/users/slipups/<int:user_id>', methods=['GET'])
+def get_slipups(user_id):
+    # Call the db_handler method to get the slipups
+    response = db_handler.get_user_slipups(user_id)
+    
+    # Check for errors in the response
+    if "error" in response:
+        return jsonify(response), 404
+    return jsonify(response), 200
+
+# Endpoint for logging in a user #
 @app.route('/login', methods=['POST'])
 def login():
     login_data = request.json
