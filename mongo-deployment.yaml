@@ -15,15 +15,27 @@ spec:
       containers:
       - name: mongodb
         image: mongo:6.0
+        command: ["sh", "-c", "cp /backup/restore-mongo.sh /tmp/restore-mongo.sh && chmod +x /tmp/restore-mongo.sh && /tmp/restore-mongo.sh && docker-entrypoint.sh mongod"]
         ports:
         - containerPort: 27017
         volumeMounts:
         - name: mongo-data
           mountPath: /data/db
+        - name: backup-storage
+          mountPath: /backup
+        - name: restore-script
+          mountPath: /backup/restore-mongo.sh
+          subPath: restore-mongo.sh
       volumes:
       - name: mongo-data
         persistentVolumeClaim:
           claimName: mongo-pvc
+      - name: backup-storage
+        persistentVolumeClaim:
+          claimName: mongo-backup-pvc
+      - name: restore-script
+        configMap:
+          name: restore-script
 ---
 apiVersion: v1
 kind: Service
