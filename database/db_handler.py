@@ -45,7 +45,7 @@ def add_user_slipup(user_id, slipup_date):
     return {"message": "Slipup date updated successfully"}
 
 def get_user_slipups(user_id):
-    user = users_collection.find({"user_id": user_id})
+    user = users_collection.find_one({"user_id": user_id})
     if not user:
         return {"error": "User not found"}
     slipups = user['slipups'] if 'slipups' in user else []

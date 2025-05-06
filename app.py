@@ -86,7 +86,6 @@ def add_slipup():
 def get_slipups(user_id):
     # Call the db_handler method to get the slipups
     response = db_handler.get_user_slipups(user_id)
-    
     # Check for errors in the response
     if "error" in response:
         return jsonify(response), 404
