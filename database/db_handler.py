@@ -84,7 +84,6 @@ def get_user_days_since_sober(user_id):
 # Method to check if a user_id-date combination exists
 def check_user_date_exists(user_id, date):
     record = db["user_symptoms"].find_one({"user_id": user_id, "date": date})
-    print(f'RECORD: {record}') 
     return record is not None
 
 # Method to add a new user_id-date record with symptoms
@@ -129,7 +128,7 @@ def add_emotion(new_emotion):
 
 def add_user_emotions(user_id, date, emotions):
     if check_user_date_exists(user_id, date):
-        return {"error": "Record for this user and date already exists"}
+        return {"error": "Emotions for this user and date already exists"}
     
     db["user_emotions"].insert_one({
         "user_id": user_id,
@@ -158,5 +157,6 @@ def get_emotions_for_past_days(user_id, days):
     return records
 
 def check_user_emotions_exists(user_id, date):
-    record = db["user_emotions"].find_one({"user_id": user_id, "date": date})
+    record = db["user_symptoms"].find_one({"user_id": user_id, "date": date})
+    print(f'RECORD: {record}')
     return record is not None

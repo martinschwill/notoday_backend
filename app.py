@@ -186,7 +186,7 @@ def add_emotions():
     date = data.get('date', None)
 
     response = db_handler.add_user_emotions(user_id, date, emotions_list)
-
+    print(response); 
     if "error" in response:
         return jsonify(response), 400
     return jsonify(response), 201
@@ -200,7 +200,7 @@ def update_emotions():
     date = data.get('date', None)
 
     response = db_handler.update_user_emotions(user_id, date, emotions_list)
-
+    print(response)
     if "error" in response:
         return jsonify(response), 400
     return jsonify(response), 201
