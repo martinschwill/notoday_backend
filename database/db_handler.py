@@ -84,19 +84,29 @@ def get_user_days_since_sober(user_id):
 # Method to check if a user_id-date combination exists
 def check_user_date_exists(user_id, date):
     record = db["user_symptoms"].find_one({"user_id": user_id, "date": date})
-    return record is not None
+    return record is not None # Check if the record exists
+
+def check_user_symptoms_exists(user_id, date):
+    record = db["user_symptoms"].find_one({"user_id": user_id, "date": date})
+    if record is not None and 'symptoms' in record:
+        return True
+    else:
+        return False
 
 # Method to add a new user_id-date record with symptoms
 def add_user_symptoms(user_id, date, symptoms):
     if check_user_date_exists(user_id, date):
-        return {"error": "Record for this user and date already exists"}
-    
-    db["user_symptoms"].insert_one({
-        "user_id": user_id,
-        "date": date,
-        "symptoms": symptoms
-    })
-    return {"message": "Symptoms added successfully"}
+        db['user_symptoms'].update_one(
+            {"user_id": user_id, "date": date},
+            {"$set": {"symptoms": symptoms}}
+        )
+    else:
+        db["user_symptoms"].insert_one({
+            "user_id": user_id,
+            "date": date,
+            "symptoms": symptoms
+        })
+        return {"message": "Symptoms added successfully"}
 
 # Method to update symptoms for an existing user_id-date record
 def update_user_symptoms(user_id, date, symptoms):
@@ -128,14 +138,18 @@ def add_emotion(new_emotion):
 
 def add_user_emotions(user_id, date, emotions):
     if check_user_date_exists(user_id, date):
-        return {"error": "Emotions for this user and date already exists"}
-    
-    db["user_emotions"].insert_one({
-        "user_id": user_id,
-        "date": date,
-        "emotions": emotions
-    })
-    return {"message": "Emotions added successfully"}
+        result = db['user_symptoms'].update_one(
+            {"user_id": user_id, "date": date},
+            {"$set": {"emotions": emotions}}
+        )
+        return {"message": "Emotions updated successfully"}
+    else:
+        db["user_symptoms"].insert_one({
+            "user_id": user_id,
+            "date": date,
+            "emotions": emotions
+        })
+        return {"message": "Emotions added successfully"}
 
 def update_user_emotions(user_id, date, emotions):
     result = db["user_symptoms"].update_one(
@@ -158,5 +172,8 @@ def get_emotions_for_past_days(user_id, days):
 
 def check_user_emotions_exists(user_id, date):
     record = db["user_symptoms"].find_one({"user_id": user_id, "date": date})
-    print(f'RECORD: {record}')
-    return record is not None
+    if record is not None and 'emotions' in record:
+        return True
+    else:
+        return False
+   
