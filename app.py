@@ -89,7 +89,8 @@ def get_slipups(user_id):
     # Check for errors in the response
     if "error" in response:
         return jsonify(response), 404
-    return jsonify(response), 200
+    print(f"SLIPUPS: {response['slipups']}")
+    return list(response['slipups']), 200
 
 # Endpoint for logging in a user #
 @app.route('/login', methods=['POST'])
