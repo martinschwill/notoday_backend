@@ -129,7 +129,7 @@ def update_user(user_id):
     return jsonify(response)
 
 # Endpoint to add a new user_id-date record with symptoms
-@app.route('/days', methods=['POST'])
+@app.route('/days', methods=['PUT'])
 def add_symptoms():
     data = request.json
     user_id = data.get("user_id")
@@ -150,6 +150,16 @@ def check_user_date():
     print(f'{user_id}, {date}')
     exists = db_handler.check_user_date_exists(user_id, date)
     return jsonify({"exists": exists}), 200
+
+
+@app.route('/days_symptoms/check', methods=['POST'])
+def check_user_symptoms():
+    data = request.json
+    user_id = data.get("user_id")
+    date = data.get("date")
+    exists = db_handler.check_user_symptoms_exists(user_id, date)
+    return jsonify({"exists": exists}), 200
+
 
 # Endpoint to update symptoms for an existing user_id-date record
 @app.route('/days', methods=['PUT'])
@@ -186,7 +196,6 @@ def add_emotions():
     date = data.get('date', None)
 
     response = db_handler.add_user_emotions(user_id, date, emotions_list)
-    print(response); 
     if "error" in response:
         return jsonify(response), 400
     return jsonify(response), 201
@@ -199,7 +208,7 @@ def update_emotions():
     emotions_list = data.get('emotions', [])
     date = data.get('date', None)
 
-    response = db_handler.update_user_emotions(user_id, date, emotions_list)
+    response = db_handler.add_user_emotions(user_id, date, emotions_list)
     print(response)
     if "error" in response:
         return jsonify(response), 400

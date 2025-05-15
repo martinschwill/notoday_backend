@@ -100,6 +100,9 @@ def add_user_symptoms(user_id, date, symptoms):
             {"user_id": user_id, "date": date},
             {"$set": {"symptoms": symptoms}}
         )
+        if (check_user_symptoms_exists(user_id, date)):
+            return {"message": "Symptoms updated successfully"}
+        else: return {"message": "Symptoms added successfully"}
     else:
         db["user_symptoms"].insert_one({
             "user_id": user_id,
@@ -138,11 +141,14 @@ def add_emotion(new_emotion):
 
 def add_user_emotions(user_id, date, emotions):
     if check_user_date_exists(user_id, date):
-        result = db['user_symptoms'].update_one(
+        db['user_symptoms'].update_one(
             {"user_id": user_id, "date": date},
             {"$set": {"emotions": emotions}}
         )
-        return {"message": "Emotions updated successfully"}
+        if (check_user_emotions_exists(user_id, date)):
+            return {"message": "Emotions updated successfully"}
+        else: 
+            return {"message": "Emotions added successfully"}
     else:
         db["user_symptoms"].insert_one({
             "user_id": user_id,
