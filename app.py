@@ -1,9 +1,23 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
+import os
+import secrets
+from flask_mail import Mail, Message
 import database.db_handler as db_handler # Import the db_handler module
 
 app = Flask(__name__)
 CORS(app)
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # or your SMTP server
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'martin@schwill.art'
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')  # Use environment variable for security
+mail = Mail(app)
+
+
+# base_url = '10.2.40.94:5001'
+base_url = '34.27.80.19'
 
 ### SYMPTOMS ###
 
@@ -50,13 +64,49 @@ def add_emotion():
 ### USERS ###
 
 # Endpoint to create a new user
-@app.route('/users', methods=['POST'])
+@app.route('/users/create', methods=['POST'])
 def create_user():
     user_data = request.json
     response = db_handler.create_user(user_data)
     if "error" in response:
         return jsonify(response), 400
     return jsonify(response), 201
+
+
+##### USER CREATION ##### 
+# Endpoint to get a user by name or email 
+@app.route('/users/register', methods=['POST'])
+def check_user():
+    user_data = request.json
+    user_name = user_data.get("user_name")
+    user_email = user_data.get("user_email")
+    user_password = user_data.get("user_password")
+    
+    # Check if the user exists by name or email
+    if user_name and user_email:
+        response = db_handler.get_user_by_name(user_name)
+        if "error" in response:
+            response = db_handler.get_user_by_email(user_email)
+    elif user_name:
+        response = db_handler.get_user_by_name(user_name)
+    elif user_email:
+        response = db_handler.get_user_by_email(user_email)
+    else:
+        return jsonify({"error": "User name or email is required"}), 400
+    print(response) 
+    if 'error' in response and response['error'] == "User not found":
+        send_confirmation_email(4, user_name, user_password, user_email)
+        return jsonify({"message": "Confirmation email sent."}), 200
+    return jsonify(response), 401
+
+
+@app.route('/confirm/<int:user_id>/<token>', methods=['GET'])
+def confirm_email(user_id, token):
+    response = db_handler.get_user_temp(user_id, token)
+    if "error" in response:
+        return jsonify(response), 404
+    return Response("<h2>Account creation confirmed</h2>", mimetype='text/html')
+
 
 # Endpoint to get a user by user_id
 @app.route('/users/<int:user_id>', methods=['GET'])
@@ -234,6 +284,30 @@ def check_user_date_emo():
     date = data.get("date")
     exists = db_handler.check_user_emotions_exists(user_id, date)
     return jsonify({"exists": exists}), 200
+
+
+## METHODS ## 
+
+def send_confirmation_email(user_id, user_name, user_password, user_email):
+        token = generate_confirm_token()
+        # Save the token in your DB associated with the user for later verification
+        db_handler.add_user_temp(user_id, user_name, user_email, user_password, user_token=token)
+        confirm_url = f"http://{base_url}/confirm/{user_id}/{token}"
+        msg = Message(
+            subject="Confirm your email",
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[user_email],
+            html=f'<p>Please confirm your email by clicking <a href="{confirm_url}">here</a>.</p>'
+        )
+        # print(f"Sending email to: {user_email}, \nToken: {token}\nCredentials: {app.config['MAIL_USERNAME']}, {app.config['MAIL_PASSWORD']}")  
+        mail.send(msg)
+        return {"message": "Confirmation email sent."}
+
+def generate_confirm_token(): 
+    return secrets.token_urlsafe(32) 
+
+
+
 
 
 if __name__ == '__main__':

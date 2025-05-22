@@ -8,6 +8,7 @@ client = MongoClient(mongo_uri)
 db = client["notoday_db"]
 symptoms_collection = db["symptoms"]
 users_collection = db["users"]
+users_confirm = db["users_confirm"]
 
 # Symptoms operations
 def get_all_symptoms():
@@ -22,6 +23,42 @@ def create_user(user_data):
         return {"error": "User Name already exists"}
     users_collection.insert_one(user_data)
     return {"message": "User created successfully"}
+
+def get_user_by_name(user_name):
+    user = users_collection.find_one({"user_name": user_name}, {"_id": 0})  # Exclude MongoDB's _id field
+    if not user:
+        return {"error": "User not found"}
+    return user
+
+def get_user_by_email(user_email):
+    user = users_collection.find_one({"user_email": user_email}, {"_id": 0})  # Exclude MongoDB's _id field
+    if not user:
+        return {"error": "User not found"}
+    return user
+
+def add_user_temp(user_id, user_name, user_email, user_password, user_token):
+    user_data = {
+        "user_id": user_id,
+        "user_name": user_name,
+        "user_email": user_email,
+        "user_password": user_password,
+        "user_token": user_token
+    }
+    users_confirm.insert_one(user_data)
+    return {"message": "User created successfully"}
+
+def get_user_temp(user_id, user_token): 
+    result = users_confirm.find_one({"user_id": user_id, "user_token": user_token})
+    if not result:
+        return {"error": "User not found"}
+    else: 
+        result = users_collection.insert_one(
+            {"user_name": result["user_name"], 
+             "user_email": result["user_email"], 
+             "user_password": result["user_password"],
+             "user_id": result["user_id"]})
+        users_confirm.delete_one({"user_id": user_id, "user_token": user_token})
+        return {"message": "User created successfully"}
 
 def get_user_by_id(user_id):
     return users_collection.find_one({"user_id": user_id}, {"_id": 0})  # Exclude MongoDB's _id field
