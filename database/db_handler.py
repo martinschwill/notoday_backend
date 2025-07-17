@@ -161,12 +161,13 @@ def update_user_symptoms(user_id, date, symptoms):
 # Method to retrieve symptoms for x days in the past
 def get_symptoms_for_past_days(user_id, days):
     start_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+    print(f"Fetching symptoms for user {user_id} from {start_date} to today")
     records = list(db["user_symptoms"].find(
         {"user_id": user_id, "date": {"$gte": start_date}},
         {"_id": 0}
     ))
     if not records:
-        return {"error": "No records found for the given user and date range"}
+        return {"error": "No symptoms found for the given user and date range"}
     return records
 
 ### Emotions operations ###
@@ -205,12 +206,13 @@ def update_user_emotions(user_id, date, emotions):
 
 def get_emotions_for_past_days(user_id, days):
     start_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
-    records = list(db["user_emotions"].find(
+    print(f"Fetching emotions for user {user_id} from {start_date} to today")
+    records = list(db["user_symptoms"].find(
         {"user_id": user_id, "date": {"$gte": start_date}},
         {"_id": 0}
     ))
     if not records:
-        return {"error": "No records found for the given user and date range"}
+        return {"error": "No emotions found for the given user and date range"}
     return records
 
 def check_user_emotions_exists(user_id, date):

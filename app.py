@@ -12,7 +12,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # or your SMTP server
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'martin@schwill.art'
-app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')  # Use environment variable for security
+app.config['MAIL_PASSWORD'] = 'kccu ivjx zopo husj'  # Use environment variable for security
 mail = Mail(app)
 
 
@@ -225,6 +225,7 @@ def update_symptoms():
         return jsonify(response), 404
     return jsonify(response), 200
 
+
 # Endpoint to retrieve symptoms for x days in the past
 @app.route('/days/past', methods=['POST'])
 def get_past_symptoms():
@@ -284,6 +285,45 @@ def check_user_date_emo():
     date = data.get("date")
     exists = db_handler.check_user_emotions_exists(user_id, date)
     return jsonify({"exists": exists}), 200
+
+
+#### ENDPOINTS FOR UNIFIED EMOTIONS AND SYMPTOMS #### 
+
+@app.route('/entries', methods=['POST'])
+def add_symptoms_and_emotions(): 
+    data = request.json
+    user_id = data.get("user_id")
+    date = data.get("date")
+    symptoms = data.get("symptoms", [])
+    emotions = data.get("emotions", [])
+
+    # Add symptoms
+    response_symptoms = db_handler.add_user_symptoms(user_id, date, symptoms)
+    if "error" in response_symptoms:
+        return jsonify(response_symptoms), 400
+
+    # Add emotions
+    response_emotions = db_handler.add_user_emotions(user_id, date, emotions)
+    if "error" in response_emotions:
+        return jsonify(response_emotions), 400
+
+    return jsonify({"message": "Symptoms and emotions added successfully"}), 201
+
+
+@app.route('/entries', methods=['GET'])
+def get_entries_for_user_date(): 
+    user_id = request.args.get("user_id", type=int)
+    date = request.args.get("date", type=str)
+
+    # Retrieve symptoms and emotions 
+    result = db_handler.get_symptoms_for_past_days(user_id, 0)
+    if "error" in result:
+        return jsonify(result), 404
+
+    symptoms_emotions = {'symptoms': [], 'emotions': []} 
+    symptoms_emotions['symptoms'] = result[0]['symptoms']
+    symptoms_emotions['emotions'] = result[0]['emotions']
+    return jsonify(symptoms_emotions), 200
 
 
 ## METHODS ## 

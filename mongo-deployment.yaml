@@ -15,7 +15,7 @@ spec:
       containers:
       - name: mongodb
         image: mongo:6.0
-        command: ["sh", "-c", "cp /backup/restore-mongo.sh /tmp/restore-mongo.sh && chmod +x /tmp/restore-mongo.sh && /tmp/restore-mongo.sh && docker-entrypoint.sh mongod"]
+        command: ["sh", "-c", "cp /backup/restore-mongo.sh /tmp/restore-mongo.sh && chmod +x /tmp/restore-mongo.sh && /tmp/restore-mongo.sh"]
         ports:
         - containerPort: 27017
         volumeMounts:
